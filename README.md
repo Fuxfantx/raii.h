@@ -31,3 +31,29 @@ int main(int argc, char** argv) {
     }
 }
 ```
+
+# raii_rc.h
+
+Refcount Ptr implementation with stack-value handle & scoped macro which refs & derefs the Ptr automatically.
+
+```c
+#include <stdio.h>
+#include <raii_rc.h>
+
+typedef struct {int x;} some_struct;
+void customized_free(some_struct* tofree) {
+    printf("FREE %d\n", tofree->x);
+    free(tofree);
+}
+
+int main(int argc, char** argv) {
+    RcPtrf(my_handle, sizeof(some_struct), customized_free);
+    Ref(my_handle, some_struct*, instance) {
+        toInit {
+            instance->x = 168;
+        }
+        const int sth_to_return = instance->x;
+        RETURN sth_to_return;
+    }
+}
+```
