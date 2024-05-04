@@ -15,11 +15,12 @@ int main(int argc, char** argv) {
     // Typed ptr with with a scoped destructor
     TRAII(some_struct, b, some_struct_final) {
         b = some_struct_init(1, 2, 3);
+        // 
         b->x = 1;
     }
 
     // Typed ptr with scoped constructor & destructor
-    TSCOPE(some_struct, c, some_struct_final, some_struct_init, 1, 2, 3) {
+    TSCOPE(some_struct, c, some_struct_init(1,2,3), some_struct_final) {
         c->x = 0;
         // Use RETURN instead of return to make destructors called correctly.
         int sth_to_return = c->x;
