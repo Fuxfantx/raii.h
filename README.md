@@ -36,6 +36,8 @@ int main(int argc, char** argv) {
 
 Refcount Ptr implementation with stack-value handle & scoped macro which refs & derefs the Ptr automatically.
 
+- *For cross-platform **thread safety** concerns, this requires `stdatomic.h` (**C11**) .*
+
 ```c
 #include <stdio.h>
 #include <raii_rc.h>
