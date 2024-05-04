@@ -74,7 +74,7 @@ static inline void RcPtrDeref(RAII_RC_H_RC_PTR_OPAQUE_DATA_STRUCTURE* const hand
 
 /* Step 3: You may want to use the toInit scope macro within the Ref scope macro to ensure the RcPtr initialized correctly. */
 #ifndef toInit
-#define toInit  if( RAII_RC_H_CURRENT_RCPTR_HANDLE->RAII_RC_H_RC_PTR_INSTANCE.RAII_RC_H_REF_COUNT==1 )
+#define toInit  if( atomic_load(&RAII_RC_H_CURRENT_RCPTR_HANDLE->RAII_RC_H_RC_PTR_INSTANCE.RAII_RC_H_REF_COUNT)==1 )
 #endif
 
 #endif   // RAII_RC_H
