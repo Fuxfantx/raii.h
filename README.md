@@ -24,7 +24,8 @@ int main(int argc, char** argv) {
     // Typed ptr with scoped constructor & destructor
     TSCOPE(some_struct, c, some_struct_init(1,2,3), some_struct_final) {
         c->x = 0;
-        // Use RETURN instead of return to make destructors called correctly.
+        // Use RETURN instead of return to make destructors called correctly;
+        // Note that destructors are called BEFORE the return clause
         int sth_to_return = c->x;
         RETURN sth_to_return;
     }
