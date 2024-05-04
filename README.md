@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     TRAII(some_struct, b, some_struct_final) {
         b = some_struct_init(1, 2, 3);
         // Safe to use the "continue;" clause to jump out,
-        // but UNSAFE to use the "break" clause
+        // but UNSAFE to use the "break;" clause
         continue;
         b->x = 1;
     }
