@@ -13,7 +13,7 @@ typedef struct RAII_H_CHAIN {
 static RAII_H_CHAIN* RAII_H_CHAIN_CURRENT = 0;
 static inline void* RAII_H_GET_EXITER( void** final_which, const RAII_H_FINAL final ) {
     RAII_H_CHAIN* const latest = malloc(sizeof(RAII_H_CHAIN));
-    latest->layer.final_which = final_which;    latest->layer.final = final;    latest->parent = RAII_H_CHAIN_CURRENT;
+    latest->layer.final_which = final_which, latest->layer.final = final, latest->parent = RAII_H_CHAIN_CURRENT;
     RAII_H_CHAIN_CURRENT = latest;
     return (void*)1;
 }
@@ -24,8 +24,14 @@ static inline void* RAII_H_FINAL_ONCE() {
     return 0;
 }
 
+/* Use "RAII_MALLOC" instead "malloc" to express that the memory you allocated will be freed in a RAII way. */
+#ifndef RAII_MALLOC
+#define RAII_MALLOC malloc
+#endif
+
 /* Return with Recursive Destruction */
-// To make this library easy to comprehend, destruction behaviors are FORMER to the return statement;
+// To make this library easy to comprehend,
+// Destruction behaviors are FORMER to the return statement;
 // CACHE WHAT YOU NEED TO RETURN AHEAD.
 #ifndef RETURN
 #define RETURN  while(RAII_H_CHAIN_CURRENT) RAII_H_FINAL_ONCE(); return
