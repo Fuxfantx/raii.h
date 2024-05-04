@@ -7,7 +7,6 @@
 #define RAII_RC_H_MALLOC  malloc
 #define RAII_RC_H_FREE  free
 
-typedef void* RcPtrHandle;
 typedef struct {
 	void*			RAII_RC_H_POINTER		;
 	RAII_H_FINAL	RAII_RC_H_FINAL         ;
@@ -15,22 +14,26 @@ typedef struct {
 	uint16_t		RAII_RC_H_ALLOC_SIZE;   // Max 65535 Bytes.
 } RAII_RC_H_RC_PTR_INSTANCE;
 
+typedef struct {
+	const RAII_RC_H_RC_PTR_INSTANCE instance;
+} RcPtr;
 
-static inline RcPtrHandle RAII_RC_H_REF(const RcPtrHandle handle) {
+
+static inline RcPtr* RAII_RC_H_REF(RcPtr* const handle) {
 	if(handle) {
-		if( ! ((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_REF_COUNT )
-			((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_POINTER = RAII_RC_H_MALLOC( ((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_ALLOC_SIZE );
+		if( ! handle->instance.RAII_RC_H_REF_COUNT )
+			((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_POINTER = RAII_RC_H_MALLOC( handle->instance.RAII_RC_H_ALLOC_SIZE );
 		++((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_REF_COUNT;
 	}
 	return handle;
 }
 
-static inline void RAII_RC_H_DEREF(const RcPtrHandle handle) {
+static inline void RAII_RC_H_DEREF(RcPtr* const handle) {
 	if(handle) {
-		if( ((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_REF_COUNT )
+		if( handle->instance.RAII_RC_H_REF_COUNT )
 			--((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_REF_COUNT;
-		if( ((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_REF_COUNT==0 && ((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_POINTER ) {
-			((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_FINAL( ((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_POINTER );
+		if( handle->instance.RAII_RC_H_REF_COUNT==0 && handle->instance.RAII_RC_H_POINTER ) {
+			((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_FINAL( handle->instance.RAII_RC_H_POINTER );
 			((RAII_RC_H_RC_PTR_INSTANCE*)handle)->RAII_RC_H_POINTER = 0;
 		}
 	}
@@ -38,40 +41,26 @@ static inline void RAII_RC_H_DEREF(const RcPtrHandle handle) {
 
 
 /* Step 1: Create a Handle. */
-static inline RcPtrHandle RcPtr(const uint16_t size) {
-	RAII_RC_H_RC_PTR_INSTANCE* const handle = RAII_RC_H_MALLOC( sizeof(RAII_RC_H_RC_PTR_INSTANCE) );
-	handle->RAII_RC_H_POINTER = 0;
-	handle->RAII_RC_H_REF_COUNT = 0;
-	handle->RAII_RC_H_ALLOC_SIZE = size;
-	handle->RAII_RC_H_FINAL = RAII_RC_H_FREE ;
-	return handle;
+static inline RcPtr RcPtrNew(const uint16_t size) {
+	const RAII_RC_H_RC_PTR_INSTANCE i = {0, RAII_RC_H_FREE, 0, size};
+	const RcPtr p = {i};
+	return p;
 }
-
-static inline RcPtrHandle RcPtrWithFinal(const uint16_t size, const RAII_H_FINAL final) {
-	RAII_RC_H_RC_PTR_INSTANCE* const handle = RcPtr(size);
-	if(final)
-		handle->RAII_RC_H_FINAL = final;
-	return handle;
+static inline RcPtr RcPtrWithFinal(const uint16_t size, const RAII_H_FINAL final) {
+	const RAII_RC_H_RC_PTR_INSTANCE i = {0, final ? final : RAII_RC_H_FREE, 0, size};
+	const RcPtr p = {i};
+	return p;
 }
 
 /* Step 2: Use the RcPtrRef(handle, ptype, name) scope macro. */
 #ifndef RcPtrRef
-#define RcPtrRef(handle, ptype, name, init)  TSCOPE(RcPtrHandle, RAII_RC_H_CURRENT_RCPTR_HANDLE, RAII_RC_H_REF( handle ), RAII_RC_H_DEREF)    \
-	for( ptype name = handle ? ((RAII_RC_H_RC_PTR_INSTANCE*) handle )->RAII_RC_H_POINTER : 0, *RAII_RC_H_CURRENT_EXITER=( ptype )1; RAII_RC_H_CURRENT_EXITER; RAII_RC_H_CURRENT_EXITER=0 )
+#define RcPtrRef(handle, ptype, name)  TSCOPE(RcPtr*, RAII_RC_H_CURRENT_RCPTR_HANDLE, RAII_RC_H_REF(& handle ), RAII_RC_H_DEREF)                                      \
+	for( ptype name = handle .instance.RAII_RC_H_POINTER, *RAII_RC_H_CURRENT_EXITER=( ptype )1; RAII_RC_H_CURRENT_EXITER; RAII_RC_H_CURRENT_EXITER=0 )
 #endif
 
-/* Step 3: You may want to use the toInit(statement) macro to ensure the RcPtr initialized correctly. */
+/* Step 3: You may want to use the toInit scope macro to ensure the RcPtr initialized correctly. */
 #ifndef toInit
-#define toInit(statement)  if(RAII_RC_H_CURRENT_RCPTR_HANDLE && ((RAII_RC_H_RC_PTR_INSTANCE*)RAII_RC_H_CURRENT_RCPTR_HANDLE)->RAII_RC_H_REF_COUNT==1 ) { statement ;}
+#define toInit  if( RAII_RC_H_CURRENT_RCPTR_HANDLE->instance.RAII_RC_H_REF_COUNT==1 )
 #endif
-
-/* Step 4: Attempt to Free the Handle.
- *         Call RcPtrFree(&some_rcptr_handle), then check if some_rcptr_handle==0. */
-static inline void RcPtrFree(RcPtrHandle* const handle) {
-	// Since the memory allocation is deferred to the referring with RAII_RC_H_REF_COUNT == 0,
-	// The memory leakage will be 24 Bytes when forgetting to free a RcPtr, which should be acceptable.
-	if( ((RAII_RC_H_RC_PTR_INSTANCE*)*handle)->RAII_RC_H_REF_COUNT ) return;
-	RAII_RC_H_FREE(*handle);		 *handle = 0;
-}
 
 #endif   // RAII_RC_H
