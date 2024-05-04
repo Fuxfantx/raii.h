@@ -26,7 +26,7 @@ static inline void* RAII_H_FINAL_ONCE() {
 
 /* Use "RAII_MALLOC" instead of "malloc" to express that the memory you allocated will be freed in a RAII way. */
 #ifndef RAII_MALLOC
-#define RAII_MALLOC malloc
+#define RAII_MALLOC  malloc
 #endif
 
 /* Return with Recursive Destruction */
@@ -39,12 +39,12 @@ static inline void* RAII_H_FINAL_ONCE() {
 
 /* Typed ptr with with a scoped destructor */
 #ifndef TRAII
-#define TRAII(type, name, final)  for( type * name , *RAII_H_CURRENT_EXITER=( type *)RAII_H_GET_EXITER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_CURRENT_EXITER; RAII_H_CURRENT_EXITER=RAII_H_FINAL_ONCE() )
+#define TRAII(ptype, name, final)  for( ptype name , *RAII_H_CURRENT_EXITER=( ptype )RAII_H_GET_EXITER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_CURRENT_EXITER; RAII_H_CURRENT_EXITER=RAII_H_FINAL_ONCE() )
 #endif
 
 /* Typed ptr with scoped constructor & destructor */
 #ifndef TSCOPE
-#define TSCOPE(type, name, init, final)  for( type * name = init , *RAII_H_CURRENT_EXITER=( type *)RAII_H_GET_EXITER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_CURRENT_EXITER; RAII_H_CURRENT_EXITER=RAII_H_FINAL_ONCE() )
+#define TSCOPE(ptype, name, init, final)  for( ptype name = init , *RAII_H_CURRENT_EXITER=( ptype )RAII_H_GET_EXITER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_CURRENT_EXITER; RAII_H_CURRENT_EXITER=RAII_H_FINAL_ONCE() )
 #endif
 
-#endif
+#endif   // RAII_H
