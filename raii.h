@@ -24,7 +24,7 @@ static inline void* RAII_H_FINAL_ONCE() {
     return 0;
 }
 
-/* Use "RAII_MALLOC" instead "malloc" to express that the memory you allocated will be freed in a RAII way. */
+/* Use "RAII_MALLOC" instead of "malloc" to express that the memory you allocated will be freed in a RAII way. */
 #ifndef RAII_MALLOC
 #define RAII_MALLOC malloc
 #endif
