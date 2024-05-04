@@ -30,11 +30,11 @@ inline void* RAII_H_FINAL_ONCE() {
 #endif
 
 #ifndef TRAII   /* Typed ptr with with a scoped destructor */
-#define TRAII(type, name, final)  for( type * name,*RAII_H_CURRENT_EXITER=( type *)RAII_H_GET_EXITER((void**)& name ,(RAII_H_FINAL) final );RAII_H_CURRENT_EXITER;RAII_H_CURRENT_EXITER=RAII_H_FINAL_ONCE() )
+#define TRAII(type, name, final)  for( type * name ,*RAII_H_CURRENT_EXITER=( type *)RAII_H_GET_EXITER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_CURRENT_EXITER; RAII_H_CURRENT_EXITER = RAII_H_FINAL_ONCE() )
 #endif
 
 #ifndef TSCOPE  /* Typed ptr with scoped constructor & destructor */
-#define TSCOPE(type, name, final, init, ...)  for( type * name = init ( __VA_ARGS__ ),*RAII_H_CURRENT_EXITER=( type *)RAII_H_GET_EXITER((void**)& name ,(RAII_H_FINAL) final );RAII_H_CURRENT_EXITER;RAII_H_CURRENT_EXITER=RAII_H_FINAL_ONCE() )
+#define TSCOPE(type, name, final, init, ...)  for( type * name = init ( __VA_ARGS__ ),*RAII_H_CURRENT_EXITER=( type *)RAII_H_GET_EXITER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_CURRENT_EXITER; RAII_H_CURRENT_EXITER = RAII_H_FINAL_ONCE() )
 #endif
 
 #endif
