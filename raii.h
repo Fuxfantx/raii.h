@@ -3,14 +3,16 @@
 #include <stdlib.h>
 
 // Typedefs
+#pragma pack(push)
 #pragma pack(1)
-typedef void (*RAII_H_FINAL)(void*);
-typedef struct {
-    struct { void** final_which; RAII_H_FINAL final; }  layer     ;
-    unsigned long long int                              parent:63 ;
-    unsigned char                                       tag:1     ;
-} RAII_H_CHAIN;
-#pragma pack()
+    typedef void (*RAII_H_FINAL)(void*);
+    typedef struct {unsigned char t:1;} RAII_H_TAG;
+    typedef struct {
+        struct { void** final_which; RAII_H_FINAL final; }  layer     ;
+        unsigned long long int                              parent:63 ;
+        unsigned long long int                              tag:1     ;
+    } RAII_H_CHAIN;
+#pragma pack(pop)
 
 // Utils
 static RAII_H_CHAIN* RAII_H_CHAIN_CURRENT = 0;
@@ -36,8 +38,7 @@ static inline unsigned char RAII_H_TRY_FINAL() {
 #endif
 
 /* Return with Recursive Destruction */
-// To make this library easy to comprehend,
-// Destruction behaviors are FORMER to the return statement;
+// To make this library easy to comprehend, destruction behaviors are FORMER to the return statement;
 // CACHE WHAT YOU NEED TO RETURN AHEAD.
 #ifndef RETURN
 #define RETURN  while(RAII_H_CHAIN_CURRENT) RAII_H_TRY_FINAL(); return
@@ -47,14 +48,13 @@ static inline unsigned char RAII_H_TRY_FINAL() {
 #ifndef TRAII
 #define TRAII(ptype, name, final)                                                                                      \
     for( ptype name =( ptype )RAII_H_REGISTER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_TRY_FINAL(); )            \
-        for(unsigned char RAII_H_CURRENT_BREAK_SAFETY=1; RAII_H_CURRENT_BREAK_SAFETY; --RAII_H_CURRENT_BREAK_SAFETY)
+        for(RAII_H_TAG RAII_H_CURRENT_BREAK_SAFETY={1}; RAII_H_CURRENT_BREAK_SAFETY.t; --RAII_H_CURRENT_BREAK_SAFETY.t)
 #endif
 
 /* Typed ptr with scoped constructor & destructor */
 #ifndef TSCOPE
 #define TSCOPE(ptype, name, init, final)                                                                               \
     for( ptype name = ( RAII_H_REGISTER((void**)& name ,(RAII_H_FINAL) final ), ( init ) ); RAII_H_TRY_FINAL(); )      \
-        for(unsigned char RAII_H_CURRENT_BREAK_SAFETY=1; RAII_H_CURRENT_BREAK_SAFETY; --RAII_H_CURRENT_BREAK_SAFETY)
+        for(RAII_H_TAG RAII_H_CURRENT_BREAK_SAFETY={1}; RAII_H_CURRENT_BREAK_SAFETY.t; --RAII_H_CURRENT_BREAK_SAFETY.t)
 #endif
-
 #endif   // RAII_H
