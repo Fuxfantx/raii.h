@@ -1,4 +1,4 @@
-# raii.h
+# raii.h / raii_thread_safe.h
 
 Try to use C with scoped constructor & destructor.
 
@@ -6,27 +6,40 @@ Implemented with heap memory & inline data structures, making it easier to compr
 
 ```c
 #include <raii.h>
+#include <raii_thread_safe.h>
 
 typedef struct {int x;} some_struct;
 some_struct* some_struct_init(int, int, int);
 void some_struct_final(some_struct*);
 
 int main(int argc, char** argv) {
-    // Typed ptr with with a scoped destructor
-    TRAII(some_struct*, b, some_struct_final) {
-        b = some_struct_init(1, 2, 3);
-        // Safe to use the "continue;" or the "break;" clause to jump out.
+    // Ptr with with a scoped destructor
+    RAII(some_struct*, a, some_struct_final) {
+        a = some_struct_init(1, 2, 3);
+        // Safe to use the "continue;" clause to jump out.
         continue;
-        b->x = 1;
+        a->x = 1;
     }
 
-    // Typed ptr with scoped constructor & destructor
-    TSCOPE(some_struct*, c, some_struct_init(1,2,3), some_struct_final) {
-        c->x = 0;
-        // Use RETURN instead of return to make destructors called correctly;
-        // Note that destructors are called BEFORE the return clause
-        int sth_to_return = c->x;
-        RETURN sth_to_return;
+    // Ptr with scoped constructor & destructor
+    SCOPE(some_struct*, b, some_struct_init(1,2,3), some_struct_final) {
+        // Also safe to use the "break;" clause to jump out.
+        break;
+        b->x = 0;
+    }
+
+    // You need an additional preparation step to utilize the raii_thread_safe.h
+    USE_TRAII();
+    TRAII(some_struct*, c, some_struct_final) {
+        c = some_struct_init(1, 2, 3);
+        c->x = 1;
+        TSCOPE(some_struct*, d, some_struct_init(1,2,3), some_struct_final) {
+            d->x = 0;
+            // Use customized "return" to make destructors called correctly;
+            // Note that destructors are called BEFORE the return clause.
+            const int sth_to_return = d->x;   // RDETER/RSCOPE -> RETURN
+            TRETURN sth_to_return;            // TDETER/TSCOPE -> TRETURN
+        }
     }
 }
 ```

@@ -7,9 +7,10 @@
 #pragma pack(1)
     typedef void (*RAII_H_FINAL)(void*);
     typedef struct {
-        struct { void** final_which; RAII_H_FINAL final; }  layer     ;
-        unsigned long long int                              parent:63 ;
-        unsigned long long int                              tag:1     ;
+        struct { void** final_which; RAII_H_FINAL final; }  layer        ;
+        unsigned long long int                              parent:62    ;
+        unsigned long long int                              break_tag:1  ;
+        unsigned long long int                              tag:1        ;
     } RAII_H_CHAIN;
 #pragma pack(pop)
 
@@ -17,8 +18,8 @@
 static RAII_H_CHAIN* RAII_H_CHAIN_CURRENT = 0;
 static inline void* RAII_H_REGISTER( void** final_which, const RAII_H_FINAL final ) {
     RAII_H_CHAIN* const latest = malloc(sizeof(RAII_H_CHAIN));
-    latest->layer.final_which = final_which, latest->layer.final = final, latest->parent = (unsigned long long int)RAII_H_CHAIN_CURRENT, latest->tag = 1;
-    RAII_H_CHAIN_CURRENT = latest;
+    latest->layer.final_which = final_which, latest->layer.final = final, latest->break_tag = 1, latest->tag = 1;
+    latest->parent = (unsigned long long int)RAII_H_CHAIN_CURRENT, RAII_H_CHAIN_CURRENT = latest;
     return *final_which;
 }
 static inline unsigned char RAII_H_TRY_FINAL() {
@@ -44,17 +45,16 @@ static inline unsigned char RAII_H_TRY_FINAL() {
 #endif
 
 /* Typed ptr with with a scoped destructor */
-#ifndef TRAII
-#define TRAII(ptype, name, final)                                                                                      \
+#ifndef RAII
+#define RAII(ptype, name, final)                                                                                     \
     for( ptype name =( ptype )RAII_H_REGISTER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_TRY_FINAL(); )            \
-        for(unsigned char RAII_H_CURRENT_BREAK_SAFETY=1; RAII_H_CURRENT_BREAK_SAFETY; --RAII_H_CURRENT_BREAK_SAFETY)
+        for(; RAII_H_CHAIN_CURRENT->break_tag; --RAII_H_CHAIN_CURRENT->break_tag)
 #endif
 
 /* Typed ptr with scoped constructor & destructor */
-#ifndef TSCOPE
-#define TSCOPE(ptype, name, init, final)                                                                               \
+#ifndef SCOPE
+#define SCOPE(ptype, name, init, final)                                                                               \
     for( ptype name = ( RAII_H_REGISTER((void**)& name ,(RAII_H_FINAL) final ), ( init ) ); RAII_H_TRY_FINAL(); )      \
-        for(unsigned char RAII_H_CURRENT_BREAK_SAFETY=1; RAII_H_CURRENT_BREAK_SAFETY; --RAII_H_CURRENT_BREAK_SAFETY)
+        for(; RAII_H_CHAIN_CURRENT->break_tag; --RAII_H_CHAIN_CURRENT->break_tag)
 #endif
-
 #endif   // RAII_H
