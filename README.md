@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-# raii_rc.h
+# Experimental / raii_rc.h
 
 Refcount Ptr implementation with stack-value handle & scoped macro which refs & derefs the Ptr automatically.
 
