@@ -15,7 +15,7 @@
 #pragma pack(pop)
 
 /* 0. Tell this header what memory allocator & release function to use;
-      Use "RAII_MALLOC" instead of "malloc" to express that the memory you allocated will be freed in a RAII way. */
+      Use "RAII_THREAD_SAFE_H_MALLOC" instead of "malloc" to express that the memory you allocated will be freed in a RAII way. */
 #ifndef RAII_THREAD_SAFE_H_MALLOC
 #define RAII_THREAD_SAFE_H_MALLOC  malloc
 #endif
