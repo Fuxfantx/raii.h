@@ -6,7 +6,6 @@
 #pragma pack(push)
 #pragma pack(1)
     typedef void (*RAII_H_FINAL)(void*);
-    typedef struct {unsigned char t:1;} RAII_H_TAG;
     typedef struct {
         struct { void** final_which; RAII_H_FINAL final; }  layer     ;
         unsigned long long int                              parent:63 ;
@@ -48,13 +47,14 @@ static inline unsigned char RAII_H_TRY_FINAL() {
 #ifndef TRAII
 #define TRAII(ptype, name, final)                                                                                      \
     for( ptype name =( ptype )RAII_H_REGISTER((void**)& name ,(RAII_H_FINAL) final ); RAII_H_TRY_FINAL(); )            \
-        for(RAII_H_TAG RAII_H_CURRENT_BREAK_SAFETY={1}; RAII_H_CURRENT_BREAK_SAFETY.t; --RAII_H_CURRENT_BREAK_SAFETY.t)
+        for(unsigned char RAII_H_CURRENT_BREAK_SAFETY=1; RAII_H_CURRENT_BREAK_SAFETY; --RAII_H_CURRENT_BREAK_SAFETY)
 #endif
 
 /* Typed ptr with scoped constructor & destructor */
 #ifndef TSCOPE
 #define TSCOPE(ptype, name, init, final)                                                                               \
     for( ptype name = ( RAII_H_REGISTER((void**)& name ,(RAII_H_FINAL) final ), ( init ) ); RAII_H_TRY_FINAL(); )      \
-        for(RAII_H_TAG RAII_H_CURRENT_BREAK_SAFETY={1}; RAII_H_CURRENT_BREAK_SAFETY.t; --RAII_H_CURRENT_BREAK_SAFETY.t)
+        for(unsigned char RAII_H_CURRENT_BREAK_SAFETY=1; RAII_H_CURRENT_BREAK_SAFETY; --RAII_H_CURRENT_BREAK_SAFETY)
 #endif
+
 #endif   // RAII_H
