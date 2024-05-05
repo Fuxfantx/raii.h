@@ -17,12 +17,12 @@
 static RAII_H_CHAIN* RAII_H_CHAIN_CURRENT = 0;
 static inline void* RAII_H_REGISTER( void** final_which, const RAII_H_FINAL final ) {
     RAII_H_CHAIN* const latest = malloc(sizeof(RAII_H_CHAIN));
-    latest->layer.final_which = final_which, latest->layer.final = final, latest->parent = (unsigned long long int)RAII_H_CHAIN_CURRENT;
+    latest->layer.final_which = final_which, latest->layer.final = final, latest->parent = (unsigned long long int)RAII_H_CHAIN_CURRENT, latest->tag = 1;
     RAII_H_CHAIN_CURRENT = latest;
     return *final_which;
 }
 static inline unsigned char RAII_H_TRY_FINAL() {
-    if( RAII_H_CHAIN_CURRENT && !++RAII_H_CHAIN_CURRENT->tag ) {
+    if( RAII_H_CHAIN_CURRENT && ++RAII_H_CHAIN_CURRENT->tag ) {
         (*RAII_H_CHAIN_CURRENT->layer.final)(*RAII_H_CHAIN_CURRENT->layer.final_which);
         RAII_H_CHAIN* const temporary_parent = (RAII_H_CHAIN*)RAII_H_CHAIN_CURRENT->parent;
         free(RAII_H_CHAIN_CURRENT), RAII_H_CHAIN_CURRENT = temporary_parent;
