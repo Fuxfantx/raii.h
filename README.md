@@ -37,8 +37,8 @@ int main(int argc, char** argv) {
             d->x = 0;
             // Use customized "return" to make destructors called correctly;
             // Note that destructors are called BEFORE the return clause.
-            const int sth_to_return = d->x;   // RDETER/RSCOPE -> RETURN
-            TRETURN sth_to_return;            // TDETER/TSCOPE -> TRETURN
+            const int sth_to_return = d->x;   // RAII / SCOPE -> RETURN
+            TRETURN sth_to_return;            // TRAII/TSCOPE -> TRETURN
         }
     }
 }
