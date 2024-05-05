@@ -60,7 +60,7 @@ static inline unsigned char RAII_THREAD_SAFE_H_TRY_FINAL(RAII_THREAD_SAFE_H_CHAI
         for(; RAII_THREAD_SAFE_H_CHAIN_CURRENT->break_tag; --RAII_THREAD_SAFE_H_CHAIN_CURRENT->break_tag)
 #endif
 
-/* 3. Use Treturn instead of "return" to ensure finalizers called correctly. */
+/* 3. Use TRETURN instead of "return" to ensure finalizers called correctly. */
 // To make this library easy to comprehend, destruction behaviors are FORMER to the return statement;
 // CACHE WHAT YOU NEED TO RETURN AHEAD.
 #ifndef TRETURN
